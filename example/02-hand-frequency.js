@@ -1,4 +1,6 @@
 // calculate exact probability of hand by its name.
+// this reproduces the work of https://en.wikipedia.org/wiki/Poker_probability
+
 /* output after 40 secs execution.
 
 5 cards probability out of 2598960 caces
