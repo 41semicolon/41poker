@@ -1,0 +1,24 @@
+{
+  "name": "41poker",
+  "version": "1.0.0",
+  "description": "holdem poker simulation stuff",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "authors": [
+    "41semicolon @41semicolon (https://github.com/41semicolon)"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.11.0",
+    "jest": "^22.4.3"
+  },
+  "dependencies": {
+    "lodash": "^4.17.10",
+    "ramda": "^0.25.0"
+  }
+}
