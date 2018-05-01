@@ -37,7 +37,7 @@ const handrepr = (val) => {
   return 'straight flush';
 };
 
-const handmeter = (board, hands) => {
+const handmeterTV = (board, hands) => {
   // 1. setup deck
   let deck = range(52).filter(c => !board.includes(c));
   hands.map((hand) => { deck = deck.filter(c => !hand.includes(c)); return null; });
@@ -61,5 +61,5 @@ module.exports = {
   handval,
   handcode,
   handrepr,
-  handmeter,
+  handmeterTV,
 };
