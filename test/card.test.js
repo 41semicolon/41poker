@@ -4,6 +4,7 @@ const {
   parse,
   hrepr,
   hparse,
+  HCARDNAMES,
 } = require('../src/card.js');
 
 test('check card()', () => {
@@ -45,6 +46,14 @@ test('check hparse()', () => {
   expect(hparse('33')).toEqual([card(1, 0), card(1, 1)]);
   expect(hparse('34s')).toEqual([card(1, 0), card(2, 0)]);
   expect(hparse('34o')).toEqual([card(1, 0), card(2, 1)]);
+});
 
+test('check HCARDNAMES', () => {
+  expect(HCARDNAMES.length).toBe(13 * 13);
+  expect(HCARDNAMES.includes('AA')).toBe(true);
+  expect(HCARDNAMES.includes('22')).toBe(true);
+  expect(HCARDNAMES.includes('AKs')).toBe(true);
+  expect(HCARDNAMES.includes('AKo')).toBe(true);
+  expect(HCARDNAMES.includes('T2o')).toBe(true);
 });
 
