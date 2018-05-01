@@ -1,9 +1,8 @@
 // Performance first, avoiding loop, conditional, unnecessary variables.
 /* eslint no-bitwise: 'off' */
-/* eslint camelcase: 'off' */
 /* eslint object-curly-newline: 'off' */
 
-const { dp, scode, rcode, flushcheck, flush, noflush5, noflush6, noflush7 } = require('./handval-tables.js');
+const { dp, scode, rcode, flushcheck, flush, noflush5, noflush6, noflush7 } = require('./tables/handval-tables.js');
 
 const hashQuinary = (q, len, kk) => {
   let sum = 0;
