@@ -1,0 +1,113 @@
+<html> <head> 
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-color.v1.min.js"></script>
+<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+</head>
+<body>
+  <div id="hoge2"></div>
+  <div id="hoge3"></div>
+  <div id="hoge4"></div>
+  <div id="hoge5"></div>
+  <div id="hoge6"></div>
+  <div id="hoge7"></div>
+  <div id="hoge8"></div>
+  <div id="hoge9"></div>
+<script>
+
+// constants
+const canvas = [600, 600];
+const margin = {top: 30, right: 15, bottom: 15, left: 15};
+const width = canvas[0] - margin.left - margin.right;
+const height = canvas[1] - margin.top - margin.bottom;
+
+// function related to cards
+const pos = str => {
+  switch (str) {
+    case 'A': return 0;
+    case 'K': return 1;
+    case 'Q': return 2;
+    case 'J': return 3;
+    case 'T': return 4;
+    default: return - parseInt(str, 10) + 14;
+  }
+}
+const posOf = str => {
+  const pos1 = pos(str[0]);
+  const pos2 = pos(str[1]);
+  if (str.length === 2)
+    return [pos1, pos1]; // diag
+  if (str[2] === 's')
+    return [pos2, pos1]; // suited position
+  return [pos1, pos2]; // offsuited position
+}
+
+// functions related D3
+const createSVG = (selector) => (
+  d3.select(selector).append("svg")
+   .attr("width",  width + margin.left + margin.right)
+   .attr("height", height + margin.top + margin.bottom)
+   .append("g")
+   .attr("transform", `translate(${margin.left}, ${margin.top})`)
+);
+
+const drawBackground = svg => {
+  svg.append('g').append('rect')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('width', width)
+    .attr('height', height)
+    .style('fill', 'aliceblue')
+}
+
+const drawTitle = (svg, title) => {
+  svg.append('g').append('text')
+    .attr('transform', `translate(${width / 2 - 4 * title.length }, -10)`)
+    .text(title)
+    .style('font-size', '10pt')
+}
+
+const drawWith = (svg, scx, scy, scc) => (str, content) => {
+  const [posX, posY] = posOf(str);
+  // box
+  const boxsize = 40;
+  svg.append('g').append('rect')
+    .attr('x', scx(posX))
+    .attr('y', scy(posY))
+    .attr('width', boxsize)
+    .attr('height', boxsize)
+    .style('fill', scc(content))
+  // label
+  svg.append('g').append('text')
+    .attr('transform', `translate(${scx(posX)}, ${scy(posY) + 10})`)
+    .text(str)
+    .style('font-size', '10pt')
+  // content
+  svg.append('g').append('text')
+    .attr('transform', `translate(${scx(posX) + 2}, ${scy(posY) + 25})`)
+    .text(content)
+    .style('font-size', '10pt')
+};
+
+// main
+const main = async() => {
+  const resp = await fetch('/preflop-data.json');
+  const jdata = await resp.json();
+
+  const scX = d3.scaleBand().domain([...Array(13).keys()]).range([0, width]);
+  const scY = d3.scaleBand().domain([...Array(13).keys()]).range([0, height]);
+  const scC = d3.scaleSequential().interpolator(d3.interpolateCool).domain([0, 100]);
+
+  [2, 3, 4, 5, 6, 7, 8, 9].forEach((i) => {
+    const svg = createSVG(`#hoge${i}`);
+    drawBackground(svg);
+    drawTitle(svg, `preflop hand strengh, ${i} Players, 1,000,000 samples/cell`);
+    const draw = drawWith(svg, scX, scY, scC);
+    Object.entries(jdata[i]).forEach(([hstr, rate]) => { draw(hstr, (rate).toFixed(1)); });
+  });
+};
+main();
+
+</script> </body></html>
+<!-- vim: number ts=2 sw=2 smartindent :
+-->
