@@ -91,7 +91,7 @@ const drawWith = (svg, scx, scy, scc) => (str, content) => {
 
 // main
 const main = async() => {
-  const resp = await fetch('/preflop-data.json');
+  const resp = await fetch('/41poker/preflop-data.json');
   const jdata = await resp.json();
 
   const scX = d3.scaleBand().domain([...Array(13).keys()]).range([0, width]);
