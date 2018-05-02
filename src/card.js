@@ -1,8 +1,9 @@
 /* eslint no-bitwise: 'off' */
-const card = (rank, suit) => (suit | (rank << 2));
 
 // single card stuff
-const rankRepr = (num) => {
+const card = (rank, suit) => (suit | (rank << 2));
+
+const rankrepr = (num) => {
   switch (num >> 2) {
     case 12: return 'A';
     case 11: return 'K';
@@ -12,53 +13,53 @@ const rankRepr = (num) => {
     default: return (num >> 2) + 2;
   }
 };
-
-const repr = (num) => {
-  let suitStr;
+const suitrepr = (num) => {
   switch (num & 0b11) {
-    case 0: suitStr = '♥'; break;
-    case 1: suitStr = '♦'; break;
-    case 2: suitStr = '♣'; break;
-    case 3: suitStr = '♠'; break;
-    default:
+    case 0: return '♥';
+    case 1: return '♦';
+    case 2: return '♣';
+    case 3: return '♠';
+    default: return '?';
   }
-  return `${rankRepr(num)}${suitStr}`;
 };
-const parse = (str) => {
-  let rank;
+const repr = num => `${rankrepr(num)}${suitrepr(num)}`;
+
+const parserank = (str) => {
   switch (str[0]) {
-    case 'A': rank = 12; break;
-    case 'K': rank = 11; break;
-    case 'Q': rank = 10; break;
-    case 'J': rank = 9; break;
-    case 'T': rank = 8; break;
-    default: rank = parseInt(str[0], 10) - 2;
+    case 'A': return 12;
+    case 'K': return 11;
+    case 'Q': return 10;
+    case 'J': return 9;
+    case 'T': return 8;
+    default: return parseInt(str[0], 10) - 2;
   }
-  let suit;
+};
+const parsesuit = (str) => {
   switch (str[1]) {
     case '♥':
     case 'h':
-    case 'H': suit = 0; break;
+    case 'H': return 0;
     case '♦':
     case 'd':
-    case 'D': suit = 1; break;
+    case 'D': return 1;
     case '♣':
     case 'c':
-    case 'C': suit = 2; break;
+    case 'C': return 2;
     case '♠':
     case 's':
-    case 'S': suit = 3; break;
-    default:
+    case 'S': return 3;
+    default: throw Error('invalid suit');
   }
-  return card(rank, suit);
 };
+const parse = str => card(parserank(str), parsesuit(str));
+
 
 // hole cards stuff
 
 const hrepr = (cards) => { // cards -> AA, AKs, ...
   const work = [...cards];
   work.sort((x, y) => (x >> 2) - (y >> 2)).reverse();
-  const rletter = work.map(rankRepr).join('');
+  const rletter = work.map(rankrepr).join('');
   const sletter = ((work[0] & 0b11) === (work[1] & 0b11)) ? 's' : 'o';
   if ((work[0] >> 2) === (work[1] >> 2)) {
     return rletter; // returns AA, not AAo
