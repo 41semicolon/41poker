@@ -25,7 +25,7 @@ const handcode = (val) => {
   return STRAIGHT_FLUSH;
 };
 
-const handrepr = (val) => {
+const handname = (val) => {
   if (val > 6185) return 'high card';
   if (val > 3325) return 'one pair';
   if (val > 2467) return 'two pairs';
@@ -60,6 +60,6 @@ const handmeterTV = (board, hands) => {
 module.exports = {
   handval,
   handcode,
-  handrepr,
+  handname,
   handmeterTV,
 };

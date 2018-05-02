@@ -31,7 +31,7 @@
 
 const assert = require('assert');
 const { range, forEachCombinationApply } = require('../src/util.js');
-const { handval, handrepr } = require('../src/hand.js');
+const { handval, handname } = require('../src/index.js');
 
 const stats = Array(7462 + 1).fill(0); // + 1 means stats[val] represents val of stats.
 forEachCombinationApply(
@@ -47,7 +47,7 @@ assert(stats.reduce((acc, x) => acc + x, 0) === 2598960);
 
 // group by hand name
 const handstats = {};
-stats.map((freq, val) => [handrepr(val), freq])
+stats.map((freq, val) => [handname(val), freq])
   .map(([name, freq]) => {
     if (handstats[name]) handstats[name] += freq;
     else handstats[name] = freq;
@@ -75,7 +75,7 @@ assert(stats7.reduce((acc, x) => acc + x, 0) === 133784560);
 
 // group by hand name
 const handstats7 = {};
-stats7.map((freq, val) => [handrepr(val), freq])
+stats7.map((freq, val) => [handname(val), freq])
   .map(([name, freq]) => {
     if (handstats7[name]) handstats7[name] += freq;
     else handstats7[name] = freq;

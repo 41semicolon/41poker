@@ -1,5 +1,5 @@
 const { range, shuffle } = require('./util.js');
 
-const getdeck = () => shuffle(range(52));
+const deck = () => shuffle(range(52));
 
-module.exports = { getdeck };
+module.exports = { deck };

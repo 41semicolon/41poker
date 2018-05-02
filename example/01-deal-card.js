@@ -12,11 +12,12 @@
 // Q♥ Q♠ 2♥ 9♣ 8♥ 3♣ A♠ one pair(3793)
 // 7♦ 4♥ 9♠ 7♣ J♣ 4♦ J♥ two pairs(2868)
 
-const { getdeck } = require('../src/game.js');
-const { repr } = require('../src/card.js');
-const { handval, handrepr } = require('../src/hand.js');
+const P = require('../src/index.js');
 
 for (let i = 0; i < 10; i += 1) {
-  const hand = getdeck().slice(0, 7);
-  console.log(`${hand.map(repr).join(' ')} ${handrepr(hand)}(${handval(hand)})`);
+  const hand = P.deck().slice(0, 7);
+  const name = P.handname(hand);
+  const value = P.handval(hand);
+  const handStr = hand.map(P.repr).join(' ');
+  console.log(`${handStr} ${name}(${value})`);
 }

@@ -6,7 +6,7 @@
 // flop    [ '84%', '16%' ] Borad: [ 'A♦', '4♠', '8♣' ]
 // turn    [ '93%', '7%'  ] Board: [ 'A♦', '4♠', '8♣', '5♦' ]
 
-const { card, repr } = require('../src/card.js');
+const { card, repr } = require('../src/index.js');
 const { handmeterTV } = require('../src/hand.js');
 
 const hands = [[card(11, 0), card(10, 0)], [card(10, 1), card(8, 2)]];

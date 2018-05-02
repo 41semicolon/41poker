@@ -28,14 +28,13 @@ hand frequency (7 cards) out of 10000000 samples
 17.42% 1742177 high card
 */
 
-const { handval, handrepr } = require('../src/hand.js');
-const { getdeck } = require('../src/game.js');
+const { deck, handval, handname } = require('../src/index.js');
 
 const rankfreqSimulation = (cardnum, nSample) => {
   // 1. do simulation
   const stats = Array(7462 + 1).fill(0); // + 1 means stats[val] represents val of stats.
   for (let i = 0; i < nSample; i += 1) {
-    const hand = getdeck().slice(0, cardnum);
+    const hand = deck().slice(0, cardnum);
     const value = handval(hand);
     if (value > 7462) throw Error('something wrong');
     stats[value] += 1;
@@ -43,7 +42,7 @@ const rankfreqSimulation = (cardnum, nSample) => {
   // 2. group by hand name
   const handstats = {};
   stats
-    .map((freq, val) => [handrepr(val), freq])
+    .map((freq, val) => [handname(val), freq])
     .map(([name, freq]) => {
       if (handstats[name]) handstats[name] += freq;
       else handstats[name] = freq;
