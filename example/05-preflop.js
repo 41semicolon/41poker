@@ -4,7 +4,7 @@
 // For more details, see https://qiita.com/41semicolon/items/c5a33e516999d5108cda
 
 const { handval, deck } = require('../src/index.js');
-const { hparse, HCARDNAMES } = require('../src/card.js');
+const { hparse, HCARDNAMES } = require('../src/hcard.js');
 
 const simulate = (hname, nPlayer, nSample) => {
   const hcards = hparse(hname);
