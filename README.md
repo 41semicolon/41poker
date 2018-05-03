@@ -1,5 +1,7 @@
 # 41poker
 
+[![Build Status](https://travis-ci.com/41semicolon/41poker.svg?branch=master)](https://travis-ci.com/41semicolon/41poker)
+
 41poker is a JavaScript toolset for Texas Hold'em, including
 
 - efficient hand evaluator
