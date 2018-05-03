@@ -2,6 +2,7 @@ const { card } = require('../src/card.js');
 const {
   hrepr,
   hparse,
+  hs,
   hsPreflop,
   HCARDNAMES,
 } = require('../src/hcard.js');
@@ -37,5 +38,12 @@ test('check hsPreflop', () => {
   expect(hsPreflop(3, [51, 50])).toBeCloseTo(73.8, 0);
   expect(hsPreflop(4, [51, 50])).toBeCloseTo(64.2, 0);
   expect(hsPreflop(5, [51, 50])).toBeCloseTo(56.2, 0);
+});
+
+test('check hs', () => {
+  expect(hs([51, 50], 2, [], 100000)).toBeCloseTo(0.855, 2);
+  expect(hs([51, 50], 3, [], 100000)).toBeCloseTo(0.738, 2);
+  expect(hs([51, 50], 4, [], 100000)).toBeCloseTo(0.642, 2);
+  expect(hs([51, 50], 5, [], 100000)).toBeCloseTo(0.562, 2);
 });
 

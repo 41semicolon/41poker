@@ -29,16 +29,16 @@ hand frequency (7 cards) out of 10000000 samples
 */
 
 const { deck, handval, handname } = require('../src/index.js');
+const { simulateN } = require('../src/util.js');
 
 const rankfreqSimulation = (cardnum, nSample) => {
+  const simulation = simulateN(nSample);
   // 1. do simulation
-  const stats = Array(7462 + 1).fill(0); // + 1 means stats[val] represents val of stats.
-  for (let i = 0; i < nSample; i += 1) {
-    const hand = deck().slice(0, cardnum);
-    const value = handval(hand);
-    if (value > 7462) throw Error('something wrong');
-    stats[value] += 1;
-  }
+  const stats = simulation(
+    () => handval(deck().slice(0, cardnum)),
+    (acc, val) => { acc[val] += 1; return acc; },
+    Array(7462 + 1).fill(0), // + 1 means stats[val] represents val of stats.
+  );
   // 2. group by hand name
   const handstats = {};
   stats
@@ -55,6 +55,6 @@ const rankfreqSimulation = (cardnum, nSample) => {
     .map(([name, freq, prob]) => { console.log(prob, freq, name) });
 };
 
-rankfreqSimulation(5, 10000000);
+rankfreqSimulation(5, 1000000);
 console.log();
-rankfreqSimulation(7, 10000000);
+rankfreqSimulation(7, 1000000);

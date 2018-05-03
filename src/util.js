@@ -60,9 +60,18 @@ const forEachCombinationApply = (f, size, arr) => {
   return null; // this function returns nothing
 };
 
+const simulateN = nSample => (fn, fnAcc, initAcc) => {
+  let ret = initAcc;
+  for (let i = 0; i < nSample; i += 1) {
+    ret = fnAcc(ret, fn());
+  }
+  return ret;
+};
+
 module.exports = {
   combinations,
   forEachCombinationApply,
+  simulateN,
   range: _.range,
   shuffle: _.shuffle,
 };

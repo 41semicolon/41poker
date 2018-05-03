@@ -1,8 +1,9 @@
 /* eslint no-bitwise: 'off' */
 /* eslint no-mixed-operators: 'off' */
 const { rankrepr, parse } = require('./card.js');
+const { deck } = require('./game.js');
 const { HS_PREFLOP } = require('./tables/preflop-hs.js');
-const { range, forEachCombinationApply } = require('./util.js');
+const { range, forEachCombinationApply, simulateN } = require('./util.js');
 const { handval7 } = require('./handval.js');
 
 // repr i.e. AA, AKs, ...
@@ -30,11 +31,11 @@ const hparse = (str) => {
 };
 
 // calculates handstrength when opponents' cards are known.
-// possible cases amounts to no less than C(48, 5) = 1.7M, which results in a seconds of compuatation
+// possible cases amounts to no less than C(48, 5) = 1.7M, which results in a seconds of compuatation time
 const handmeterTV = (board, hands) => {
   // 1. setup deck
-  let deck = range(52).filter(c => !board.includes(c));
-  hands.map((hand) => { deck = deck.filter(c => !hand.includes(c)); return null; });
+  let dk = range(52).filter(c => !board.includes(c));
+  hands.map((hand) => { dk = dk.filter(c => !hand.includes(c)); return null; });
   // 2. for all possible cases, check who is the winner and update stat.
   const counter = hands.map(() => 0);
   forEachCombinationApply(
@@ -44,17 +45,33 @@ const handmeterTV = (board, hands) => {
       values.forEach((val, i) => { if (val === winval) counter[i] += 1; });
     },
     5 - board.length, // number of cards to draw from deck
-    deck,
+    dk,
   );
   // 3. normalize stats
   const sum = counter.reduce((acc, x) => acc + x, 0);
   return counter.map(x => x / sum * 100.0);
 };
 
-// hand strength stuff
-const hsPreflop = (nPlayer, mycards) => HS_PREFLOP[nPlayer][hrepr(mycards)];
-const hsFlop = 0;
-const hsTurn = 0;
+// hand strength(HS)
+const hs = (mycards, nPlayer = 2, board = [], nSample = 10000) => {
+  const stats = simulateN(nSample)(
+    () => { // returns true if I win or draw
+      const numDraw = 5 - board.length;
+      const dk = deck().filter(x => !mycards.includes(x) && !board.includes(x));
+      const allboard = [...board, ...dk.slice(0, numDraw)];
+      const myvalue = handval7([...allboard, ...mycards]);
+      return range(nPlayer - 1)
+        .map(i => [...allboard, ...dk.slice(numDraw + 2 * i, numDraw + 2 * i + 2)])
+        .map(handval7)
+        .reduce((acc, x) => acc && (myvalue <= x), true);
+    },
+    (count, win) => (win ? count + 1 : count),
+    0, // count
+  );
+  return stats / nSample;
+};
+
+const hsPreflop = (nPlayer, mycards) => HS_PREFLOP[nPlayer][hrepr(mycards)]; //precomputed.
 
 const HCARDNAMES = [
   '22',
@@ -76,8 +93,7 @@ module.exports = {
   hrepr,
   hparse,
   handmeterTV,
+  hs,
   hsPreflop,
-  hsFlop,
-  hsTurn,
   HCARDNAMES,
 };

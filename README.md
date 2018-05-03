@@ -4,8 +4,8 @@
 
 41poker is a JavaScript toolset for Texas Hold'em, including
 
-- efficient hand evaluator
-- handmeter
+- efficient hand evaluator for 5,6,7 cards
+- hand strength simulator for preflop, flop, turn
 - smart agent (to be implemented)
 - console/browser gameplay (to be implemented)
 - ...
@@ -40,7 +40,20 @@ console.log(handstr, name, value);
 // -> K♣ A♥ 5♦ 9♣ 6♥ 2♦ 3♥ high card 6305
 ```
 
-show handmeter
+calculate your hand strength (derived by simulation)
+
+```js
+P.hs([51, 50], 2) // -> 0.8553, hand strength of AA, 2players, preflop.
+P.hs([51, 50], 3) // -> 0.7444, hand strength of AA, 3players, preflop.
+
+P.hs([51, 50], 2, [3, 8, 40]) // -> 0.8466 hs of AA, 2players, flop with 2♠ 4♥ Q♥
+P.hs([51, 50], 3, [3, 8, 40]) // -> 0.7287 hs of AA, 3players, flop with 2♠ 4♥ Q♥
+
+P.hs([51, 50], 2, [3, 8, 40, 20]) // -> 0.7837 hs of AA, 2players, turn with 2♠ 4♥ Q♥ 7♥
+P.hs([51, 50], 3, [3, 8, 40, 20]) // -> 0.6212 hs of AA, 3players, turn with 2♠ 4♥ Q♥ 7♥
+```
+
+handmeter, which you can find in TV show.
 
 ```js
 const deck = P.deck();
@@ -61,8 +74,6 @@ const turn = P.handmeterTV(deck.slice(4, 8), hands).map(x => x.toFixed(2));
 console.log(hrepr[0], turn[0], hrepr[1], turn[1], deck.slice(4, 8).map(P.repr).join(''));
 // -> 7♦A♥ 100.00 6♣2♠ 0.00 A♦T♠K♠8♣
 ```
-
-
 
 ## Articles
 
