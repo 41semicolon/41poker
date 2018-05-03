@@ -1,8 +1,12 @@
 /* eslint no-bitwise: 'off' */
+/* eslint no-mixed-operators: 'off' */
 const { rankrepr, parse } = require('./card.js');
 const { HS_PREFLOP } = require('./tables/preflop-hs.js');
+const { range, forEachCombinationApply } = require('./util.js');
+const { handval7 } = require('./handval.js');
 
-const hrepr = (cards) => { // cards -> AA, AKs, ...
+// repr i.e. AA, AKs, ...
+const hrepr = (cards) => {
   const work = [...cards];
   work.sort((x, y) => (x >> 2) - (y >> 2)).reverse();
   const rletter = work.map(rankrepr).join('');
@@ -13,7 +17,8 @@ const hrepr = (cards) => { // cards -> AA, AKs, ...
   return `${rletter}${sletter}`;
 };
 
-const hparse = (str) => { // AKo -> hand,
+// parse i.e. AKo -> repsenetive hands
+const hparse = (str) => {
   if (str.length === 2) { // pockets
     return [parse(`${str[0]}H`), parse(`${str[1]}D`)];
   }
@@ -22,6 +27,28 @@ const hparse = (str) => { // AKo -> hand,
     case 'o': return [parse(`${str[0]}H`), parse(`${str[1]}D`)];
     default: throw Error('invalid input');
   }
+};
+
+// calculates handstrength when opponents' cards are known.
+// possible cases amounts to no less than C(48, 5) = 1.7M, which results in a seconds of compuatation
+const handmeterTV = (board, hands) => {
+  // 1. setup deck
+  let deck = range(52).filter(c => !board.includes(c));
+  hands.map((hand) => { deck = deck.filter(c => !hand.includes(c)); return null; });
+  // 2. for all possible cases, check who is the winner and update stat.
+  const counter = hands.map(() => 0);
+  forEachCombinationApply(
+    (cards) => {
+      const values = hands.map(h => [...board, ...cards, ...h]).map(handval7);
+      const winval = values.reduce((acc, x) => (acc > x ? x : acc), 9999);
+      values.forEach((val, i) => { if (val === winval) counter[i] += 1; });
+    },
+    5 - board.length, // number of cards to draw from deck
+    deck,
+  );
+  // 3. normalize stats
+  const sum = counter.reduce((acc, x) => acc + x, 0);
+  return counter.map(x => x / sum * 100.0);
 };
 
 // hand strength stuff
@@ -48,9 +75,9 @@ const HCARDNAMES = [
 module.exports = {
   hrepr,
   hparse,
+  handmeterTV,
   hsPreflop,
   hsFlop,
   hsTurn,
   HCARDNAMES,
 };
-

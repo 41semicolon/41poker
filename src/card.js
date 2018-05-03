@@ -2,6 +2,7 @@
 
 const card = (rank, suit) => (suit | (rank << 2));
 
+// repr
 const rankrepr = (num) => {
   switch (num >> 2) {
     case 12: return 'A';
@@ -23,6 +24,7 @@ const suitrepr = (num) => {
 };
 const repr = num => `${rankrepr(num)}${suitrepr(num)}`;
 
+// parse
 const parserank = (str) => {
   switch (str[0]) {
     case 'A': return 12;

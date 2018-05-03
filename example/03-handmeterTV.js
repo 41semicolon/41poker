@@ -7,7 +7,7 @@
 // turn    [ '93%', '7%'  ] Board: [ 'A♦', '4♠', '8♣', '5♦' ]
 
 const { card, repr } = require('../src/index.js');
-const { handmeterTV } = require('../src/hand.js');
+const { handmeterTV } = require('../src/hcard.js');
 
 const hands = [[card(11, 0), card(10, 0)], [card(10, 1), card(8, 2)]];
 const board3 = [card(12, 1), card(2, 3), card(6, 2)];

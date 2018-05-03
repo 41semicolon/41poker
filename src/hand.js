@@ -1,8 +1,5 @@
 /* eslint no-mixed-operators: 'off' */
 
-const { handval, handval7 } = require('./handval.js');
-const { range, forEachCombinationApply } = require('./util.js');
-
 const STRAIGHT_FLUSH = 0;
 const FOUR_OF_A_KIND = 1;
 const FULL_HOUSE = 2;
@@ -37,29 +34,16 @@ const handname = (val) => {
   return 'straight flush';
 };
 
-const handmeterTV = (board, hands) => {
-  // 1. setup deck
-  let deck = range(52).filter(c => !board.includes(c));
-  hands.map((hand) => { deck = deck.filter(c => !hand.includes(c)); return null; });
-  // 2. for all possible cases, check who is the winner and update stat.
-  const counter = hands.map(() => 0);
-  forEachCombinationApply(
-    (cards) => {
-      const values = hands.map(h => [...board, ...cards, ...h]).map(handval7);
-      const winval = values.reduce((acc, x) => (acc > x ? x : acc), 9999);
-      values.forEach((val, i) => { if (val === winval) counter[i] += 1; });
-    },
-    5 - board.length, // number of cards to draw from deck
-    deck,
-  );
-  // 3. normalize stats
-  const sum = counter.reduce((acc, x) => acc + x, 0);
-  return counter.map(x => x / sum * 100.0);
-};
-
 module.exports = {
-  handval,
+  STRAIGHT_FLUSH,
+  FOUR_OF_A_KIND,
+  FULL_HOUSE,
+  FLUSH,
+  STRAIGHT,
+  THREE_OF_A_KIND,
+  TWO_PAIR,
+  ONE_PAIR,
+  HIGH_CARD,
   handcode,
   handname,
-  handmeterTV,
 };

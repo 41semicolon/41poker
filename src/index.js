@@ -2,6 +2,7 @@ const card = require('./card.js');
 const hcard = require('./hcard.js');
 const game = require('./game.js');
 const hand = require('./hand.js');
+const handval = require('./handval.js');
 
 module.exports = {
   card: card.card,
@@ -11,9 +12,10 @@ module.exports = {
   hsPreflop: hcard.hsPreflop,
   hsFlop: hcard.hsFlop,
   hsTurn: hcard.hsTurn,
-
-  handval: hand.handval,
   handname: hand.handname,
+
+
+  handval: handval.handval,
 
   deck: game.deck,
 };
