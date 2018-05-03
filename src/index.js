@@ -9,11 +9,11 @@ module.exports = {
   repr: card.repr,
   parse: card.parse,
 
+  handmeterTV: hcard.handmeterTV,
   hsPreflop: hcard.hsPreflop,
   hsFlop: hcard.hsFlop,
   hsTurn: hcard.hsTurn,
   handname: hand.handname,
-
 
   handval: handval.handval,
 
