@@ -68,10 +68,16 @@ const simulateN = nSample => (fn, fnAcc, initAcc) => {
   return ret;
 };
 
+const xlog = (entry) => {
+  console.log(entry);
+};
+
 module.exports = {
   combinations,
   forEachCombinationApply,
   simulateN,
+  xlog,
   range: _.range,
   shuffle: _.shuffle,
+  max: _.max,
 };
