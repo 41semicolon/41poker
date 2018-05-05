@@ -70,6 +70,7 @@ const simulateN = nSample => (fn, fnAcc, initAcc) => {
 
 const xlog = (entry) => {
   console.log(entry);
+  return entry;
 };
 
 module.exports = {

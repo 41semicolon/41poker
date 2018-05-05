@@ -71,7 +71,7 @@ const hs = (mycards, nPlayer = 2, board = [], nSample = 10000) => {
   return stats / nSample;
 };
 
-const hsPreflop = (nPlayer, mycards) => HS_PREFLOP[nPlayer][hrepr(mycards)]; //precomputed.
+const hsPreflop = (nPlayer, mycards) => HS_PREFLOP[nPlayer][hrepr(mycards)]; // precomputed.
 
 const HCARDNAMES = [
   '22',
