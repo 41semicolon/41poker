@@ -1,27 +1,20 @@
-const { xlog } = require('./util.js');
+const { xlog, copy } = require('./util.js');
 const { handval7 } = require('./handval.js');
 const { playerAction } = require('./bot/index.js');
-const { numboard, reducer } = require('./game.js');
+const game = require('./game.js');
 
 const initialize = (state0) => {
-  const state = { ...state0 };
+  const state = copy(state0);
   // no stack, no participate
   const folded = state.players.map((_, i) => state.stacks[i] < 2 * state.SB);
   // decide SB, BB
-  const order = folded
-    .map((f, i) => (i < state.nextBTN ? [i, i + folded.length, f] : [i, i, f])) // memorize index number
-    .filter(x => !x[2]) // filter out folded players
-    .sort((x, y) => x[1] - y[1]) // sort by effective index
-    .map(x => x[0]);
-  if (order.length < 2) throw Error('cannnot start game');
-  const bb = order[order.length - 1];
-  const sb = order[order.length - 2];
+  const { posBB, posSB, posBTN } = game.positionOf(folded, state.lastBB);
   const betamount = state.players.map(() => 0);
-  betamount[sb] = state.SB;
-  betamount[bb] = state.SB * 2;
+  betamount[posSB] = state.SB;
+  betamount[posBB] = state.SB * 2;
   const stacks = [...state.stacks];
-  stacks[sb] -= state.SB;
-  stacks[bb] -= state.SB * 2;
+  stacks[posSB] -= state.SB;
+  stacks[posBB] -= state.SB * 2;
   return {
     ...state,
     pot: 0,
@@ -30,30 +23,26 @@ const initialize = (state0) => {
     board: state.deck.slice(0, 5),
     hcards: state.players.map((_, i) => [state.deck[5 + (2 * i)], state.deck[6 + (2 * i)]]),
     finished: false,
-    nextPlayer: order[0],
-    posBB: bb,
-    posSB: sb,
-    posBTN: order[0],
+    nextPlayer: posBTN,
+    lastBB: posBB, // update in advance,
+    posBB,
+    posSB,
+    posBTN,
     folded,
     stacks,
     betamount,
   };
 };
 
+// create concealed info for next better
 const forNextPlayer = (state) => {
   // who is next player? Most likely he/she is state.nextPlayer, but he/she might have folded
-  const nPlayer = state.players.length;
-  const player = state.folded
-    .map((f, i) => (i < state.nextPlayer ? [i, i + nPlayer, f] : [i, i, f])) // keep index number
-    .filter(([i, ii, f]) => !f && state.betchance[i]) // pick up who is not folded (and has bet chance, is this condition redundant?)
-    .sort((x, y) => x[1] - y[1]) // sort by effective index
-    .shift()[0];
-  // conceal some information
+  const player = game.nextplayer(state.folded, state.betchance, state.nextPlayer);
   const { deck: _, board, hcards, ...rest } = state;
   return {
     ...rest,
     player,
-    board: board.slice(0, numboard(state.phase)),
+    board: board.slice(0, game.numboard(state.phase)),
     hcard: hcards[player],
   };
 };
@@ -78,17 +67,17 @@ const finalize = (state0) => {
   });
   if (change) {
     const receiver = winners
-      .map(i => (i < state.nextBTN ? [i, i + state.nextBTN] : [i, i]))
+      .map(i => (i < state.posSB ? [i, i + winners.length] : [i, i]))
       .sort((x, y) => x[1] - y[1])
       .pop()[0];
     state.stacks[receiver] += change;
   }
-  xlog({ type: 'finished', value: `winner: ${winners.join(',')}` });
+  xlog({ type: 'finished', value: `winner: ${winners.join(',')} pot: ${allpot}}` });
   return {
     stacks: state.stacks,
     players: state.players,
     SB: state.SB,
-    nextBTN: (state.nextBTN + 1) % state.players.length,
+    lastBB: state.lastBB,
   };
 };
 
@@ -96,13 +85,13 @@ const onegame = (state0) => {
   let state = initialize(state0);
   for (;;) {
     // advance with global state
-    state = reducer(state, { type: 'phasecheck', value: {} });
+    state = game.reducer(state, { type: 'phasecheck', value: {} });
     if (state.finished) break;
 
     // advance with player action
     const info = forNextPlayer(state);
     const action = playerAction(info);
-    state = reducer(state, action);
+    state = game.reducer(state, action);
   }
   return finalize(state);
 };

@@ -1,4 +1,4 @@
-const { max, range, shuffle, xlog } = require('./util.js');
+const { copy, max, range, shuffle, xlog } = require('./util.js');
 
 const deck = () => shuffle(range(52));
 
@@ -17,7 +17,7 @@ const potodds = (pot, bet) => (pot + bet) / bet;
 const ev = (hsval, pot, bet) => hsval * (pot + bet);
 
 const updateGameStatus = (state0) => {
-  const state = { ...state0 };
+  const state = copy(state0);
   // check survivors
   const survivors = state.folded.map((x, i) => [i, x]).filter(x => !x[1]);
   if (survivors.length === 1) return { ...state, finished: true };
@@ -35,7 +35,7 @@ const updateGameStatus = (state0) => {
 };
 
 const reducer = (state0, action) => {
-  let state = { ...state0 };
+  let state = copy(state0);
   switch (action.type) {
     case ('fold'):
       state.folded[action.value.player] = true;
@@ -67,10 +67,32 @@ const reducer = (state0, action) => {
   return {
     ...state,
     nextPlayer: (action.value.player
-      ? (action.value.player + 1) % state.players.length // it is naive but ok
+      ? (action.value.player + 1) % state.players.length
       : state.nextPlayer),
   };
 };
+
+// position finding algorithm
+// used for 1. determine BTN, and 2. determine next player
+const positionOf = (flist, lastBB) => {
+  const order = flist
+    .map((val, i) => (i <= lastBB ? [i, i + flist.length, val] : [i, i, val]))
+    .filter(x => !x[2]) // filter out folded players
+    .sort((x, y) => x[1] - y[1]) // sort by effective index
+    .map(x => x[0]);
+  const posBB = order[0];
+  const posSB = order[order.length - 1];
+  const posBTN = order[order.length - 2];
+  return { posBB, posSB, posBTN };
+};
+
+// almost identical
+const nextplayer = (flist, clist, cand) => flist
+  .map((val, i) => (i < cand ? [i, i + flist.length, val] : [i, i, val]))
+  .filter(x => !x[2] && clist[x[0]]) // filter out folded players and players already done.
+  .sort((x, y) => x[1] - y[1]) // sort by effective index
+  .map(x => x[0])
+  .shift();
 
 module.exports = {
   deck,
@@ -78,4 +100,7 @@ module.exports = {
   potodds,
   numboard,
   reducer,
+
+  positionOf,
+  nextplayer,
 };
