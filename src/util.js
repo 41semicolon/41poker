@@ -81,5 +81,6 @@ module.exports = {
   range: _.range,
   shuffle: _.shuffle,
   max: _.max,
+  min: _.min,
   copy: _.cloneDeep,
 };
