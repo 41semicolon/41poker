@@ -10,16 +10,16 @@ const initialize = (state0) => {
   const folded = state.players.map((_, i) => state.stacks[i] < 2 * state.SB);
   // decide SB, BB
   const { posBB, posSB, posBTN } = game.positionOf(folded, state.lastBB);
-  const betamount = state.players.map(() => 0);
-  betamount[posSB] = state.SB;
-  betamount[posBB] = state.SB * 2;
+  const bets = state.players.map(() => 0);
+  bets[posSB] = state.SB;
+  bets[posBB] = state.SB * 2;
   const stacks = [...state.stacks];
   stacks[posSB] -= state.SB;
   stacks[posBB] -= state.SB * 2;
   return {
     ...state,
     pots: [0],
-    potCommiters: [[]],
+    commiters: [[]],
     phase: 0,
     betchance: state.players.map(() => true),
     board: state.deck.slice(0, 5),
@@ -32,7 +32,7 @@ const initialize = (state0) => {
     posBTN,
     folded,
     stacks,
-    betamount,
+    bets,
   };
 };
 
@@ -51,17 +51,19 @@ const forNextPlayer = (state) => {
 
 // payout and cleaning state
 const finalize = (state0) => {
-  const state = { ...state0 };
+  const state = copy(state0);
+  const values = state.hcards // 9999 for folded.
+    .map(h => [...state.board, ...h])
+    .map((x, i) => (state.folded[i] ? 9999 : handval7(x)));
   const shares = pot.share(
-    handval // NEEDFIX: ,
+    values,
     state.pots,
-    state.potCommiters,
+    state.commiters,
     state.posSB,
   );
-  shares.forEach(s => {
-    state.stacks[i] += s;
-  });
+  shares.forEach((s, i) => { state.stacks[i] += s; });
   xlog({ type: 'finished', value: '' });
+
   return {
     stacks: state.stacks,
     players: state.players,

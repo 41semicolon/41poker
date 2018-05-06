@@ -19,15 +19,14 @@ const ev = (hsval, pot, bet) => hsval * (pot + bet);
 
 const updateGameStatus = (state0) => {
   const state = copy(state0);
-  // check survivors
   const survivors = state.folded.map((x, i) => [i, x]).filter(x => !x[1]);
   if (survivors.length === 1) return { ...state, finished: true };
   if (survivors.filter(([i]) => state.betchance[i]).length === 0) { // phase end?
     state.phase += 1;
-    const [pots, commiters] = potmake(state.pot, state.commiters, state.betamount); // make pots
+    const [pots, commiters] = potmake(state.pot, state.commiters, state.bets); // make pots
     state.pots = pots;
     state.commiters = commiters;
-    state.betamount = state.players.map(() => 0);
+    state.bets = state.players.map(() => 0);
     state.betchance = state.players.map(() => true);
     state.nextPlayer = state.posSB; // SB is the first player after preflop.
     xlog({ type: 'phaseshift', value: state.phase });
@@ -46,19 +45,17 @@ const reducer = (state0, action) => {
       state.betchance[action.value.player] = false;
       break;
     case ('call'):
-      const chipTocall = max(state.betamount) - state.betamount[action.value.player];
+      const chipTocall = max(state.bets) - state.bets[action.value.player];
       state.betchance[action.value.player] = false;
-      state.betamount[action.value.player] += chipTocall;
+      state.bets[action.value.player] += chipTocall;
       state.stacks[action.value.player] -= chipTocall;
       break;
     case ('raise'):
+    case ('allin'): // raise and allin are no diffrent in our program, but validation logic needed.
       state.betchance = state.players.map(() => true); // reset.
       state.betchance[action.value.player] = false;
-      state.betamount[action.value.player] += action.value.amount;
+      state.bets[action.value.player] += action.value.amount;
       state.stacks[action.value.player] -= action.value.amount;
-      break;
-    case ('allin'):
-      throw Error('not implemented'); // TODO: redesign required for side pot
       break;
     case ('phasecheck'):
       state = updateGameStatus(state);

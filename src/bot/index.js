@@ -1,7 +1,7 @@
 const { max, xlog } = require('../util.js');
 const { hsPreflop } = require('../hcard.js');
 
-const chipTocall = (info, myID) => max(info.betamount) - info.betamount[myID];
+const chipTocall = (info, myID) => max(info.bets) - info.bets[myID];
 
 // a very very weak bot. it only checks or folds.
 const weakest = (info) => {
