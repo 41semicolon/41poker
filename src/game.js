@@ -23,7 +23,7 @@ const updateGameStatus = (state0) => {
   if (survivors.length === 1) return { ...state, finished: true };
   if (survivors.filter(([i]) => state.betchance[i]).length === 0) { // phase end?
     state.phase += 1;
-    const [pots, commiters] = potmake(state.pot, state.commiters, state.bets); // make pots
+    const [pots, commiters] = potmake(state.pots, state.commiters, state.bets); // make pots
     state.pots = pots;
     state.commiters = commiters;
     state.bets = state.players.map(() => 0);

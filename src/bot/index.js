@@ -12,6 +12,18 @@ const weakest = (info) => {
     : { type: 'fold', value: { ...p } };
 };
 
+// a bot to all-in
+const crazy = (info) => {
+  const myID = info.player;
+  const mystack = info.stacks[myID];
+  const c2c = chipTocall(info, myID);
+  const p = { player: myID };
+
+  if (mystack !== c2c) return { type: 'allin', value: { ...p, amount: mystack } };
+  return { type: 'call', value: { ...p } };
+};
+
+
 // a bot simulating calling stations.
 const dull = (info) => {
   const myID = info.player;
@@ -71,6 +83,7 @@ const baby = (info) => {
 const botlookup = (name) => {
   switch (name) {
     case 'weakest': return weakest;
+    case 'crazy': return crazy;
     case 'dull': return dull;
     case 'stealer': return stealer;
     case 'baby': return baby;

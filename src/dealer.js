@@ -55,7 +55,7 @@ const finalize = (state0) => {
   const values = state.hcards // 9999 for folded.
     .map(h => [...state.board, ...h])
     .map((x, i) => (state.folded[i] ? 9999 : handval7(x)));
-  const shares = pot.share(
+  const shares = pot.shares(
     values,
     state.pots,
     state.commiters,
@@ -63,7 +63,6 @@ const finalize = (state0) => {
   );
   shares.forEach((s, i) => { state.stacks[i] += s; });
   xlog({ type: 'finished', value: '' });
-
   return {
     stacks: state.stacks,
     players: state.players,

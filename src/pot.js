@@ -30,6 +30,9 @@ const sidepot = (pots0, commiters0, bets0) => {
 // betamount -> pots, potCommiters
 const potmake = (pots0, commiters0, bets0) => {
   const [pots, commiters, bets] = [copy(pots0), copy(commiters0), copy(bets0)];
+  if (bets.filter(x => x !== 0).length === 0) { // everybody checks
+    return [pots, commiters];
+  }
   // add bets to current pot.
   const minval = min(bets.filter(x => x !== 0));
   if (minval <= 0) throw Error('something wrong');
