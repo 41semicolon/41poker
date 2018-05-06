@@ -1,4 +1,6 @@
-const { copy, min } = require('./util.js');
+// this module includes pot stuff.
+
+const { copy, min, max } = require('./util.js');
 
 // used by the function below. recursive structure
 const sidepot = (pots0, commiters0, bets0) => {
@@ -48,6 +50,25 @@ const potmake = (pots0, commiters0, bets0) => {
   return sidepot(pots, commiters, bets);
 };
 
+// pots to winners!
+// it assumes no one is folded, so put 9999 or something for folded players if exist.
+const shares = (handvals, pots, commiters, posSB) => {
+  const posOrder = handvals.map((_, i) => (i < posSB ? i + handvals.length : i)); // SB is the strongest
+  const scores = Array(handvals.length).fill(0);
+  pots.forEach((pot, i) => {
+    const cs = commiters[i];
+    const minval = min(handvals.filter((_, j) => cs.includes(j)));
+    const winners = cs
+      .filter(c => handvals[c] === minval)
+      .sort((x, y) => (posOrder[x] - posOrder[y]));
+    let rest = pot;
+    winners.forEach((w) => { scores[w] += Math.floor(pot / winners.length); rest -= Math.floor(pot / winners.length); });
+    if (rest) scores[winners[0]] += rest;
+  });
+  return scores;
+};
+
 module.exports = {
   potmake,
+  shares,
 };

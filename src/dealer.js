@@ -2,6 +2,7 @@ const { xlog, copy } = require('./util.js');
 const { handval7 } = require('./handval.js');
 const { playerAction } = require('./bot/index.js');
 const game = require('./game.js');
+const pot = require('./pot.js');
 
 const initialize = (state0) => {
   const state = copy(state0);
@@ -17,7 +18,8 @@ const initialize = (state0) => {
   stacks[posBB] -= state.SB * 2;
   return {
     ...state,
-    pot: 0,
+    pots: [0],
+    potCommiters: [[]],
     phase: 0,
     betchance: state.players.map(() => true),
     board: state.deck.slice(0, 5),
@@ -50,29 +52,16 @@ const forNextPlayer = (state) => {
 // payout and cleaning state
 const finalize = (state0) => {
   const state = { ...state0 };
-  const allpot = state.pot + state.betamount.reduce((acc, x) => acc + x, 0);
-  const result = state.folded
-    .map((folded, i) => [i, folded, handval7([...state.board, ...state.hcards[i]])])
-    .filter(x => !x[1]) // filter out folded players
-    .sort((x, y) => x[2] - y[2]); // sort by handval
-  const winners = result
-    .filter(x => x[2] <= result[0][2])
-    .map(x => x[0]);
-
-  // payout to winners. Change is payout-ed to the worst position, if exists.
-  let change = allpot;
-  winners.forEach((i) => {
-    state.stacks[i] += Math.floor(allpot / winners.length);
-    change -= Math.floor(allpot / winners.length);
+  const shares = pot.share(
+    handval // NEEDFIX: ,
+    state.pots,
+    state.potCommiters,
+    state.posSB,
+  );
+  shares.forEach(s => {
+    state.stacks[i] += s;
   });
-  if (change) {
-    const receiver = winners
-      .map(i => (i < state.posSB ? [i, i + winners.length] : [i, i]))
-      .sort((x, y) => x[1] - y[1])
-      .pop()[0];
-    state.stacks[receiver] += change;
-  }
-  xlog({ type: 'finished', value: `winner: ${winners.join(',')} pot: ${allpot}}` });
+  xlog({ type: 'finished', value: '' });
   return {
     stacks: state.stacks,
     players: state.players,

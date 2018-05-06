@@ -1,4 +1,5 @@
 const { copy, max, range, shuffle, xlog } = require('./util.js');
+const { potmake } = require('./pot.js');
 
 const deck = () => shuffle(range(52));
 
@@ -21,13 +22,14 @@ const updateGameStatus = (state0) => {
   // check survivors
   const survivors = state.folded.map((x, i) => [i, x]).filter(x => !x[1]);
   if (survivors.length === 1) return { ...state, finished: true };
-  // phase shift if needed
-  if (survivors.filter(([i]) => state.betchance[i]).length === 0) {
+  if (survivors.filter(([i]) => state.betchance[i]).length === 0) { // phase end?
     state.phase += 1;
-    state.pot += state.betamount.reduce((acc, x) => acc + x, 0);
+    const [pots, commiters] = potmake(state.pot, state.commiters, state.betamount); // make pots
+    state.pots = pots;
+    state.commiters = commiters;
     state.betamount = state.players.map(() => 0);
     state.betchance = state.players.map(() => true);
-    state.nextPlayer = (state.nextBTN + 1) % state.players.length; // SB is the first player after preflop.
+    state.nextPlayer = state.posSB; // SB is the first player after preflop.
     xlog({ type: 'phaseshift', value: state.phase });
   }
   if (state.phase === 4) return { ...state, finished: true };
