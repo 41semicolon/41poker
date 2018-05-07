@@ -85,7 +85,7 @@ const positionOf = (flist, lastBB) => {
   return { posBB, posSB, posBTN };
 };
 
-// almost identical
+// who is next player? Most likely he/she is state.nextPlayer, but he/she might have folded
 const nextplayer = (flist, clist, cand) => flist
   .map((val, i) => (i < cand ? [i, i + flist.length, val] : [i, i, val]))
   .filter(x => !x[2] && clist[x[0]]) // filter out folded players and players already done.

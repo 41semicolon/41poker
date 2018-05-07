@@ -1,6 +1,5 @@
 const { max, xlog } = require('../util.js');
 const { hsPreflop } = require('../hcard.js');
-const { human } = require('./human.js');
 
 const chipTocall = (info, myID) => max(info.bets) - info.bets[myID];
 
@@ -81,7 +80,7 @@ const baby = async (info) => {
   return { type: 'call', value: { ...p } };
 };
 
-const botlookup = (name) => {
+const botlookup = (human, name) => {
   switch (name) {
     case 'human': return human;
     case 'weakest': return weakest;
@@ -93,8 +92,8 @@ const botlookup = (name) => {
   }
 };
 
-const playerAction = async (info) => {
-  const bot = botlookup(info.players[info.player]);
+const playerAction = async (human, info) => {
+  const bot = botlookup(human, info.players[info.player]);
   const action = await bot(info);
   return xlog(action);
 };

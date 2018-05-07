@@ -7,6 +7,7 @@ const { repr } = require('./card.js');
 
 const initialize = (state0) => {
   const state = copy(state0);
+
   // no stack, no participate
   const folded = state.players.map((_, i) => state.stacks[i] < 2 * state.SB);
   if (folded.filter(x => !x).length < 2) throw Error('more player needed.');
@@ -18,6 +19,7 @@ const initialize = (state0) => {
   const stacks = [...state.stacks];
   stacks[posSB] -= state.SB;
   stacks[posBB] -= state.SB * 2;
+
   return {
     ...state,
     pots: [0],
@@ -38,9 +40,8 @@ const initialize = (state0) => {
   };
 };
 
-// create concealed info for next better
+// create concealed info
 const forNextPlayer = (state) => {
-  // who is next player? Most likely he/she is state.nextPlayer, but he/she might have folded
   const player = game.nextplayer(state.folded, state.betchance, state.nextPlayer);
   const { deck: _, board, hcards, ...rest } = state;
   return {
@@ -87,7 +88,7 @@ const finalize = (state0) => {
   };
 };
 
-const onegame = async (state0) => {
+const onegame = human => async (state0) => {
   let state = initialize(state0);
   for (;;) {
     // advance with global state
@@ -96,7 +97,7 @@ const onegame = async (state0) => {
 
     // advance with player action
     const info = forNextPlayer(state);
-    const action = await playerAction(info);
+    const action = await playerAction(human, info);
     state = game.reducer(state, action);
   }
   return finalize(state);

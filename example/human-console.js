@@ -1,6 +1,6 @@
 const readline = require('readline');
-const { repr } = require('../index.js');
-const { max } = require('../util.js');
+const { repr } = require('../src/index.js');
+const { max } = require('../src/util.js');
 
 const chipTocall = (info, myID) => max(info.bets) - info.bets[myID];
 
