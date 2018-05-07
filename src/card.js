@@ -10,7 +10,15 @@ const rankrepr = (num) => {
     case 10: return 'Q';
     case 9: return 'J';
     case 8: return 'T';
-    default: return (num >> 2) + 2;
+    case 7:
+    case 6:
+    case 5:
+    case 4:
+    case 3:
+    case 2:
+    case 1:
+    case 0: return (num >> 2) + 2;
+    default: throw Error(`wrong value: ${num}`);
   }
 };
 const suitrepr = (num) => {
@@ -19,7 +27,7 @@ const suitrepr = (num) => {
     case 1: return '♦';
     case 2: return '♣';
     case 3: return '♠';
-    default: return '?';
+    default: throw Error(`wrong value: ${num}`);
   }
 };
 const repr = num => `${rankrepr(num)}${suitrepr(num)}`;
@@ -32,7 +40,15 @@ const parserank = (str) => {
     case 'Q': return 10;
     case 'J': return 9;
     case 'T': return 8;
-    default: return parseInt(str[0], 10) - 2;
+    case '9':
+    case '8':
+    case '7':
+    case '6':
+    case '5':
+    case '4':
+    case '3':
+    case '2': return parseInt(str[0], 10) - 2;
+    default: throw Error(`wrong value: ${str}`);
   }
 };
 const parsesuit = (str) => {
