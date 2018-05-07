@@ -3,11 +3,13 @@ const { handval7 } = require('./handval.js');
 const { playerAction } = require('./bot/index.js');
 const game = require('./game.js');
 const pot = require('./pot.js');
+const { repr } = require('./card.js');
 
 const initialize = (state0) => {
   const state = copy(state0);
   // no stack, no participate
   const folded = state.players.map((_, i) => state.stacks[i] < 2 * state.SB);
+  if (folded.filter(x => !x).length < 2) throw Error('more player needed.');
   // decide SB, BB
   const { posBB, posSB, posBTN } = game.positionOf(folded, state.lastBB);
   const bets = state.players.map(() => 0);
@@ -62,7 +64,21 @@ const finalize = (state0) => {
     state.posSB,
   );
   shares.forEach((s, i) => { state.stacks[i] += s; });
+
   xlog({ type: 'finished', value: '' });
+
+  // for human players
+  if (state.players.includes('human')) {
+    console.log(`Board: ${state.board.map(repr).join(' ')}`);
+    shares.forEach((s, p) => {
+      if (s === 0) return;
+      console.log(`#${p} gains ${s} for ${state.hcards[p].map(repr).join(' ')}`);
+    });
+    const stacks = state.stacks.map((val, p) => `#${p}: ${val}`).join(',');
+    console.log(`stack results in ${stacks}`);
+    //console.log(state, shares);
+  }
+
   return {
     stacks: state.stacks,
     players: state.players,
@@ -71,7 +87,7 @@ const finalize = (state0) => {
   };
 };
 
-const onegame = (state0) => {
+const onegame = async (state0) => {
   let state = initialize(state0);
   for (;;) {
     // advance with global state
@@ -80,7 +96,7 @@ const onegame = (state0) => {
 
     // advance with player action
     const info = forNextPlayer(state);
-    const action = playerAction(info);
+    const action = await playerAction(info);
     state = game.reducer(state, action);
   }
   return finalize(state);

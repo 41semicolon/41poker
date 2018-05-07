@@ -20,7 +20,6 @@ const ev = (hsval, pot, bet) => hsval * (pot + bet);
 const updateGameStatus = (state0) => {
   const state = copy(state0);
   const survivors = state.folded.map((x, i) => [i, x]).filter(x => !x[1]);
-  if (survivors.length === 1) return { ...state, finished: true };
   if (survivors.filter(([i]) => state.betchance[i]).length === 0) { // phase end?
     state.phase += 1;
     const [pots, commiters] = potmake(state.pots, state.commiters, state.bets); // make pots
@@ -31,6 +30,7 @@ const updateGameStatus = (state0) => {
     state.nextPlayer = state.posSB; // SB is the first player after preflop.
     xlog({ type: 'phaseshift', value: state.phase });
   }
+  if (survivors.length === 1) return { ...state, finished: true };
   if (state.phase === 4) return { ...state, finished: true };
   return state;
 };

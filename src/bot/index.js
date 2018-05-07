@@ -1,10 +1,11 @@
 const { max, xlog } = require('../util.js');
 const { hsPreflop } = require('../hcard.js');
+const { human } = require('./human.js');
 
 const chipTocall = (info, myID) => max(info.bets) - info.bets[myID];
 
 // a very very weak bot. it only checks or folds.
-const weakest = (info) => {
+const weakest = async (info) => {
   const myID = info.player;
   const p = { player: myID };
   return (chipTocall(info, myID) === 0)
@@ -13,7 +14,7 @@ const weakest = (info) => {
 };
 
 // a bot to all-in
-const crazy = (info) => {
+const crazy = async (info) => {
   const myID = info.player;
   const mystack = info.stacks[myID];
   const c2c = chipTocall(info, myID);
@@ -25,7 +26,7 @@ const crazy = (info) => {
 
 
 // a bot simulating calling stations.
-const dull = (info) => {
+const dull = async (info) => {
   const myID = info.player;
   const mystack = info.stacks[myID];
   const c2c = chipTocall(info, myID);
@@ -37,7 +38,7 @@ const dull = (info) => {
 };
 
 // a bot trying to steal blinds at preflop
-const stealer = (info) => {
+const stealer = async (info) => {
   const myID = info.player;
   const mystack = info.stacks[myID];
   const c2c = chipTocall(info, myID);
@@ -61,7 +62,7 @@ const stealer = (info) => {
 // a very naive bot. it never raises.
 // it folds only at preflop when his hole card is not met the odds(not potodds, but raw odds).
 // Otherwise he acts like a dull bot(i.e. calling station).
-const baby = (info) => {
+const baby = async (info) => {
   const myID = info.player;
   const mystack = info.stacks[myID];
   const c2c = chipTocall(info, myID);
@@ -82,6 +83,7 @@ const baby = (info) => {
 
 const botlookup = (name) => {
   switch (name) {
+    case 'human': return human;
     case 'weakest': return weakest;
     case 'crazy': return crazy;
     case 'dull': return dull;
@@ -91,9 +93,9 @@ const botlookup = (name) => {
   }
 };
 
-const playerAction = (info) => {
+const playerAction = async (info) => {
   const bot = botlookup(info.players[info.player]);
-  const action = bot(info);
+  const action = await bot(info);
   return xlog(action);
 };
 
