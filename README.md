@@ -6,8 +6,8 @@
 
 - efficient hand evaluator for 5,6,7 cards
 - hand strength simulator for preflop, flop, turn
+- console/browser gameplay
 - smart agent (to be implemented)
-- console/browser gameplay (to be implemented)
 - ...
 
 Some development notes are published in Japanese at [Qiita](https://qiita.com/41semicolon).
@@ -77,11 +77,14 @@ console.log(hrepr[0], turn[0], hrepr[1], turn[1], deck.slice(4, 8).map(P.repr).j
 
 ## Articles
 
-some contents are avaialbel in Japanese.
+In github pages, some outcome derived by 41poker is available.
+
+- [https://41semicolon.github.io/41poker/](https://41semicolon.github.io/41poker/)
+
+Some development notes are available in Japanese.
 
 - [ハンドメータを作る](https://qiita.com/41semicolon/items/4734c9b082c9e1964f1c)
 - [ホールデムポーカのプリフロップ戦略と可視化](https://qiita.com/41semicolon/items/c5a33e516999d5108cda)
-
 
 ## Thanks
 
@@ -89,4 +92,4 @@ some contents are avaialbel in Japanese.
 
 ## License
 
-MIT
+MIT &copy; @41semicolon
