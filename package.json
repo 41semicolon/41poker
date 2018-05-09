@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "holdem poker simulation stuff",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "jest"
   },
@@ -19,6 +20,8 @@
   },
   "dependencies": {
     "lodash": "^4.17.10",
-    "ramda": "^0.25.0"
+    "ramda": "^0.25.0",
+    "webpack": "^4.8.1",
+    "webpack-cli": "^2.1.3"
   }
 }
