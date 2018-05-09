@@ -12,10 +12,36 @@ const numboard = (phase) => {
   }
 };
 
-// XXX: pot has to include opponents' bet
-// i.e. pot must be 100+30*2 when two other opponents already bet/call 30.
-const potodds = (pot, bet) => (pot + bet) / bet;
-const ev = (hsval, pot, bet) => hsval * (pot + bet);
+// position finding algorithm
+// used for 1. determine BTN, and 2. determine next player
+const positionOf = (flist, lastBB) => {
+  const order = flist
+    .map((val, i) => (i <= lastBB ? [i, i + flist.length, val] : [i, i, val]))
+    .filter(x => !x[2]) // filter out folded players
+    .sort((x, y) => x[1] - y[1]) // sort by effective index
+    .map(x => x[0]);
+  const posBB = order[0];
+  const posSB = order[order.length - 1];
+  const posBTN = order[order.length - 2];
+  return { posBB, posSB, posBTN };
+};
+
+// who is next player? Most likely he/she is state.nextPlayer, but he/she might have folded
+const nextplayer = (flist, clist, cand) => flist
+  .map((val, i) => (i < cand ? [i, i + flist.length, val] : [i, i, val]))
+  .filter(x => !x[2] && clist[x[0]]) // filter out folded players and players already done.
+  .sort((x, y) => x[1] - y[1]) // sort by effective index
+  .map(x => x[0])
+  .shift();
+
+// bet checker
+const isValidAmount = (BB, history, amount) => {
+  if (history.length === 0) { return amount >= BB; } // bet
+  if (history.length === 1) { return amount >= 2 * history[0]; }// raise
+  const last = history[history.length - 1];
+  const sndlast = history[history.length - 2];
+  return amount >= last + (last - sndlast);
+};
 
 const updateGameStatus = (state0) => {
   const state = copy(state0);
@@ -27,6 +53,7 @@ const updateGameStatus = (state0) => {
     state.commiters = commiters;
     state.bets = state.players.map(() => 0);
     state.betchance = state.players.map(() => true);
+    state.bethistory = [];
     state.nextPlayer = state.posSB; // SB is the first player after preflop.
     xlog({ type: 'phaseshift', value: state.phase });
   }
@@ -51,11 +78,12 @@ const reducer = (state0, action) => {
       state.stacks[action.value.player] -= chipTocall;
       break;
     case ('raise'):
-    case ('allin'): // raise and allin are no diffrent in our program, but validation logic needed.
+    case ('allin'): // raise and allin are no diffrent in our program, but validation logic will be diffrent.
       state.betchance = state.players.map(() => true); // reset.
       state.betchance[action.value.player] = false;
       state.bets[action.value.player] += action.value.amount;
       state.stacks[action.value.player] -= action.value.amount;
+      state.bethistory.push(action.value.amount);
       break;
     case ('phasecheck'):
       state = updateGameStatus(state);
@@ -71,35 +99,14 @@ const reducer = (state0, action) => {
   };
 };
 
-// position finding algorithm
-// used for 1. determine BTN, and 2. determine next player
-const positionOf = (flist, lastBB) => {
-  const order = flist
-    .map((val, i) => (i <= lastBB ? [i, i + flist.length, val] : [i, i, val]))
-    .filter(x => !x[2]) // filter out folded players
-    .sort((x, y) => x[1] - y[1]) // sort by effective index
-    .map(x => x[0]);
-  const posBB = order[0];
-  const posSB = order[order.length - 1];
-  const posBTN = order[order.length - 2];
-  return { posBB, posSB, posBTN };
-};
-
-// who is next player? Most likely he/she is state.nextPlayer, but he/she might have folded
-const nextplayer = (flist, clist, cand) => flist
-  .map((val, i) => (i < cand ? [i, i + flist.length, val] : [i, i, val]))
-  .filter(x => !x[2] && clist[x[0]]) // filter out folded players and players already done.
-  .sort((x, y) => x[1] - y[1]) // sort by effective index
-  .map(x => x[0])
-  .shift();
-
 module.exports = {
   deck,
-  ev,
-  potodds,
   numboard,
   reducer,
 
   positionOf,
   nextplayer,
+
+  // just for tests
+  __isValidAmount: isValidAmount,
 };

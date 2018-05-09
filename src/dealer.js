@@ -22,21 +22,27 @@ const initialize = (state0) => {
 
   return {
     ...state,
+    // stacks
+    stacks,
     pots: [0],
     commiters: [[]],
     phase: 0,
+    // bet
+    folded,
+    bets,
     betchance: state.players.map(() => true),
+    bethistory: [],
+    // card
     board: state.deck.slice(0, 5),
     hcards: state.players.map((_, i) => [state.deck[5 + (2 * i)], state.deck[6 + (2 * i)]]),
-    finished: false,
+    // position
     nextPlayer: posBTN,
     lastBB: posBB, // update in advance,
     posBB,
     posSB,
     posBTN,
-    folded,
-    stacks,
-    bets,
+
+    finished: false,
   };
 };
 
