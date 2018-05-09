@@ -58,7 +58,7 @@ test('bet check', () => {
   amount = 1;
   expect(game.__isValidAmount(BB, hist, amount)).toBe(false);
   amount = 10;
-  expect(game.__isValidAmount(BB, hist, amount)).toBe(true);
+  expect(game.__isValidAmount(BB, hist, amount)).toBe(false);
   amount = 20;
   expect(game.__isValidAmount(BB, hist, amount)).toBe(true);
 
