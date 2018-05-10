@@ -13,7 +13,6 @@ const numboard = (phase) => {
 };
 
 // position finding algorithm
-// used for 1. determine BTN, and 2. determine next player
 const positionOf = (flist, lastBB) => {
   const order = flist
     .map((val, i) => (i <= lastBB ? [i, i + flist.length, val] : [i, i, val]))
@@ -22,7 +21,7 @@ const positionOf = (flist, lastBB) => {
     .map(x => x[0]);
   const posBB = order[0];
   const posSB = order[order.length - 1];
-  const posBTN = order[order.length - 2];
+  const posBTN = order[(2 * order.length - 2) % order.length];
   return { posBB, posSB, posBTN };
 };
 
@@ -51,8 +50,8 @@ const updateGameStatus = (state0) => {
     const [pots, commiters] = potmake(state.pots, state.commiters, state.bets); // make pots
     state.pots = pots;
     state.commiters = commiters;
-    state.bets = state.players.map(() => 0);
-    state.betchance = state.players.map(() => true);
+    state.bets = Array(state.players.length).fill(0);
+    state.betchance = Array(state.players.length).fill(true);
     state.bethistory = [];
     state.nextPlayer = state.posSB; // SB is the first player after preflop.
     xlog({ type: 'phaseshift', value: state.phase });
