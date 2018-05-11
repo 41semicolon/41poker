@@ -1,6 +1,5 @@
 // this module includes pot stuff.
-
-const { copy, min, max } = require('./util.js');
+const { copy, min } = require('./util.js');
 
 // used by the function below. recursive structure
 const sidepot = (pots0, commiters0, bets0) => {

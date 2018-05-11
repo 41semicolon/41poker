@@ -1,5 +1,7 @@
 const { copy, max, range, shuffle, xlog } = require('./util.js');
-const { potmake } = require('./pot.js');
+const pot = require('./pot.js');
+const { handval7 } = require('./handval.js');
+const { repr } = require('./card.js');
 
 const deck = () => shuffle(range(52));
 
@@ -25,6 +27,82 @@ const positionOf = (flist, lastBB) => {
   return { posBB, posSB, posBTN };
 };
 
+// initialize
+const init = (state0) => {
+  const state = copy(state0);
+
+  // no stack, no participate
+  const folded = state.players.map((_, i) => state.stacks[i] < 2 * state.SB);
+  if (folded.filter(x => !x).length < 2) throw Error('more player needed.');
+  // decide SB, BB
+  const { posBB, posSB, posBTN } = positionOf(folded, state.lastBB);
+  const bets = state.players.map(() => 0);
+  bets[posSB] = state.SB;
+  bets[posBB] = state.SB * 2;
+  const stacks = [...state.stacks];
+  stacks[posSB] -= state.SB;
+  stacks[posBB] -= state.SB * 2;
+
+  return {
+    ...state,
+    // stacks
+    stacks,
+    pots: [0],
+    commiters: [[]],
+    phase: 0,
+    // bet
+    folded,
+    bets,
+    betchance: state.players.map(() => true),
+    bethistory: [],
+    // card
+    board: state.deck.slice(0, 5),
+    hcards: state.players.map((_, i) => [state.deck[5 + (2 * i)], state.deck[6 + (2 * i)]]),
+    // position
+    nextPlayer: posBTN,
+    lastBB: posBB, // update in advance,
+    posBB,
+    posSB,
+    posBTN,
+
+    finished: false,
+  };
+};
+
+const finalize = (state0) => {
+  const state = copy(state0);
+  const values = state.hcards // 9999 for folded.
+    .map(h => [...state.board, ...h])
+    .map((x, i) => (state.folded[i] ? 9999 : handval7(x)));
+  const shares = pot.shares(
+    values,
+    state.pots,
+    state.commiters,
+    state.posSB,
+  );
+  shares.forEach((s, i) => { state.stacks[i] += s; });
+
+  xlog({ type: 'finished', value: '' });
+
+  // for human players
+  if (state.players.includes('human')) {
+    console.log(`Board: ${state.board.map(repr).join(' ')}`);
+    shares.forEach((s, p) => {
+      if (s === 0) return;
+      console.log(`#${p} gains ${s} for ${state.hcards[p].map(repr).join(' ')}`);
+    });
+    const stacks = state.stacks.map((val, p) => `#${p}: ${val}`).join(',');
+    console.log(`stack results in ${stacks}`);
+  }
+
+  return {
+    stacks: state.stacks,
+    players: state.players,
+    SB: state.SB,
+    lastBB: state.lastBB,
+  };
+};
+
 // who is next player? Most likely he/she is state.nextPlayer, but he/she might have folded
 const nextplayer = (flist, clist, cand) => flist
   .map((val, i) => (i < cand ? [i, i + flist.length, val] : [i, i, val]))
@@ -47,7 +125,7 @@ const updateGameStatus = (state0) => {
   const survivors = state.folded.map((x, i) => [i, x]).filter(x => !x[1]);
   if (survivors.filter(([i]) => state.betchance[i]).length === 0) { // phase end?
     state.phase += 1;
-    const [pots, commiters] = potmake(state.pots, state.commiters, state.bets); // make pots
+    const [pots, commiters] = pot.potmake(state.pots, state.commiters, state.bets); // make pots
     state.pots = pots;
     state.commiters = commiters;
     state.bets = Array(state.players.length).fill(0);
@@ -103,8 +181,10 @@ module.exports = {
   numboard,
   reducer,
 
+  init,
   positionOf,
   nextplayer,
+  finalize,
 
   // just for tests
   __isValidAmount: isValidAmount,
