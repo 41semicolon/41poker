@@ -3,6 +3,7 @@ module.exports = {
   rules: {
     'max-len': 'off',
     'no-console': 'off',
+    'object-curly-newline': 'off',
   },
   overrides: [
     {

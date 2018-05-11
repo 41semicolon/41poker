@@ -33,4 +33,3 @@ module.exports = {
 };
 
 /* eslint no-await-in-loop: off */
-/* eslint object-curly-newline: off */

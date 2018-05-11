@@ -1,6 +1,5 @@
 // Performance first, avoiding loop, conditional, unnecessary variables.
 /* eslint no-bitwise: 'off' */
-/* eslint object-curly-newline: 'off' */
 
 const { dp, scode, rcode, flushcheck, flush, noflush5, noflush6, noflush7 } = require('./tables/handval-tables.js');
 

@@ -23,8 +23,25 @@ const positionOf = (flist, lastBB) => {
     .map(x => x[0]);
   const posBB = order[0];
   const posSB = order[order.length - 1];
-  const posBTN = order[(2 * order.length - 2) % order.length];
+  const posBTN = order[((2 * order.length) - 2) % order.length];
   return { posBB, posSB, posBTN };
+};
+
+// who is next player? Most likely he/she is state.nextPlayer, but he/she might have folded
+const nextplayer = (flist, clist, cand) => flist
+  .map((val, i) => (i < cand ? [i, i + flist.length, val] : [i, i, val]))
+  .filter(x => !x[2] && clist[x[0]]) // filter out folded players and players already done.
+  .sort((x, y) => x[1] - y[1]) // sort by effective index
+  .map(x => x[0])
+  .shift();
+
+// bet checker
+const isValidAmount = (BB, history, amount) => {
+  if (history.length === 0) { return amount >= BB; } // bet
+  if (history.length === 1) { return amount >= 2 * history[0]; }// raise
+  const last = history[history.length - 1];
+  const sndlast = history[history.length - 2];
+  return amount >= last + (last - sndlast);
 };
 
 // initialize
@@ -103,23 +120,6 @@ const finalize = (state0) => {
   };
 };
 
-// who is next player? Most likely he/she is state.nextPlayer, but he/she might have folded
-const nextplayer = (flist, clist, cand) => flist
-  .map((val, i) => (i < cand ? [i, i + flist.length, val] : [i, i, val]))
-  .filter(x => !x[2] && clist[x[0]]) // filter out folded players and players already done.
-  .sort((x, y) => x[1] - y[1]) // sort by effective index
-  .map(x => x[0])
-  .shift();
-
-// bet checker
-const isValidAmount = (BB, history, amount) => {
-  if (history.length === 0) { return amount >= BB; } // bet
-  if (history.length === 1) { return amount >= 2 * history[0]; }// raise
-  const last = history[history.length - 1];
-  const sndlast = history[history.length - 2];
-  return amount >= last + (last - sndlast);
-};
-
 const updateGameStatus = (state0) => {
   const state = copy(state0);
   const survivors = state.folded.map((x, i) => [i, x]).filter(x => !x[1]);
@@ -141,6 +141,7 @@ const updateGameStatus = (state0) => {
 
 const reducer = (state0, action) => {
   let state = copy(state0);
+  let chipTocall;
   switch (action.type) {
     case ('fold'):
       state.folded[action.value.player] = true;
@@ -149,7 +150,7 @@ const reducer = (state0, action) => {
       state.betchance[action.value.player] = false;
       break;
     case ('call'):
-      const chipTocall = max(state.bets) - state.bets[action.value.player];
+      chipTocall = max(state.bets) - state.bets[action.value.player];
       state.betchance[action.value.player] = false;
       state.bets[action.value.player] += chipTocall;
       state.stacks[action.value.player] -= chipTocall;
