@@ -1,7 +1,7 @@
 const { copy, max, range, shuffle, xlog } = require('./util.js');
-const pot = require('./pot.js');
 const { handval7 } = require('./handval.js');
 const { repr } = require('./card.js');
+const rule = require('./rule/index.js');
 
 const deck = () => shuffle(range(52));
 
@@ -13,27 +13,6 @@ const numboard = (phase) => {
     default: return 5; // river and after
   }
 };
-
-// position finding algorithm
-const positionOf = (flist, lastBB) => {
-  const order = flist
-    .map((val, i) => (i <= lastBB ? [i, i + flist.length, val] : [i, i, val]))
-    .filter(x => !x[2]) // filter out folded players
-    .sort((x, y) => x[1] - y[1]) // sort by effective index
-    .map(x => x[0]);
-  const posBB = order[0];
-  const posSB = order[order.length - 1];
-  const posBTN = order[((2 * order.length) - 2) % order.length];
-  return { posBB, posSB, posBTN };
-};
-
-// who is next player? Most likely he/she is state.nextPlayer, but he/she might have folded
-const nextplayer = (flist, clist, cand) => flist
-  .map((val, i) => (i < cand ? [i, i + flist.length, val] : [i, i, val]))
-  .filter(x => !x[2] && clist[x[0]]) // filter out folded players and players already done.
-  .sort((x, y) => x[1] - y[1]) // sort by effective index
-  .map(x => x[0])
-  .shift();
 
 // bet checker
 const isValidAmount = (BB, history, amount) => {
@@ -52,7 +31,7 @@ const init = (state0) => {
   const folded = state.players.map((_, i) => state.stacks[i] < 2 * state.SB);
   if (folded.filter(x => !x).length < 2) throw Error('more player needed.');
   // decide SB, BB
-  const { posBB, posSB, posBTN } = positionOf(folded, state.lastBB);
+  const { posBB, posSB, posBTN } = rule.positionOf(folded, state.lastBB);
   const bets = state.players.map(() => 0);
   bets[posSB] = state.SB;
   bets[posBB] = state.SB * 2;
@@ -91,7 +70,7 @@ const finalize = (state0) => {
   const values = state.hcards // 9999 for folded.
     .map(h => [...state.board, ...h])
     .map((x, i) => (state.folded[i] ? 9999 : handval7(x)));
-  const shares = pot.shares(
+  const shares = rule.shares(
     values,
     state.pots,
     state.commiters,
@@ -125,7 +104,7 @@ const updateGameStatus = (state0) => {
   const survivors = state.folded.map((x, i) => [i, x]).filter(x => !x[1]);
   if (survivors.filter(([i]) => state.betchance[i]).length === 0) { // phase end?
     state.phase += 1;
-    const [pots, commiters] = pot.potmake(state.pots, state.commiters, state.bets); // make pots
+    const [pots, commiters] = rule.potmake(state.pots, state.commiters, state.bets); // make pots
     state.pots = pots;
     state.commiters = commiters;
     state.bets = Array(state.players.length).fill(0);
@@ -183,9 +162,8 @@ module.exports = {
   reducer,
 
   init,
-  positionOf,
-  nextplayer,
   finalize,
+  nextplayer: rule.nextplayer,
 
   // just for tests
   __isValidAmount: isValidAmount,

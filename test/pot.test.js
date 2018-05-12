@@ -1,4 +1,4 @@
-const { potmake, shares } = require('../src/pot.js');
+const { potmake, shares } = require('../src/rule/pot.js');
 
 test('potmake', () => {
   let p = [0];
