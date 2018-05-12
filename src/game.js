@@ -14,15 +14,6 @@ const numboard = (phase) => {
   }
 };
 
-// bet checker
-const isValidAmount = (BB, history, amount) => {
-  if (history.length === 0) { return amount >= BB; } // bet
-  if (history.length === 1) { return amount >= 2 * history[0]; }// raise
-  const last = history[history.length - 1];
-  const sndlast = history[history.length - 2];
-  return amount >= last + (last - sndlast);
-};
-
 // initialize
 const init = (state0) => {
   const state = copy(state0);
@@ -164,7 +155,4 @@ module.exports = {
   init,
   finalize,
   nextplayer: rule.nextplayer,
-
-  // just for tests
-  __isValidAmount: isValidAmount,
 };
